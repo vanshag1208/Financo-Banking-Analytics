@@ -1,5 +1,6 @@
 CREATE DATABASE banking_analytics;
 
+
 USE banking_analytics
 
 CREATE TABLE customers (
@@ -90,5 +91,90 @@ CREATE TABLE transactions (
 );
 
 SELECT * from transactions
+where category = 'Bills'
+
+
+TRUNCATE TABLE transactions;
+
+SELECT transaction_type, COUNT(*)
+FROM transactions
+GROUP BY transaction_type;
+
+UPDATE transactions
+SET merchant = 'Company'
+WHERE merchant IN ('TCS', 'Infosys', 'Accenture', 'Google', 'Amazon');
+
+TRUNCATE TABLE credit_card_statement
+
+SELECT * from credit_card_statement
+
+CREATE TABLE credit_card_statement (
+    statement_id INT PRIMARY KEY,
+    card_id INT,
+    account_id INT,
+    statement_month DATE,
+    total_spend DECIMAL(12,2),
+    total_due DECIMAL(12,2),
+    minimum_due DECIMAL(12,2)
+);
+
+CREATE TABLE credit_card_statement (
+    statement_id INT PRIMARY KEY,
+    card_id INT,
+    account_id INT,
+    statement_month DATE,
+    total_spend DECIMAL(12,2),
+    total_due DECIMAL(12,2),
+    minimum_due DECIMAL(12,2),
+    due_date DATE,
+    payment_status VARCHAR(20),
+    payment_date DATE
+);
+
+DELETE FROM transactions
+WHERE category = 'Bills'
+  AND merchant = 'Credit Card Payment';
+
+ALTER TABLE credit_card_statement
+ADD
+    prev_outstanding   DECIMAL(14,2),
+    interest_amount    DECIMAL(14,2),
+    final_due          DECIMAL(14,2);
+
+SELECT * FROM transactions
+WHERE category = 'Bills'
+  AND merchant = 'Credit Card Payment'
+
+ SELECT * FROM credit_card_statement
+WHERE account_id ='7'
+
+UPDATE accounts
+SET balance = NULL;
+
+
+
+-- Late Customers Count 
+SELECT
+    COUNT(DISTINCT account_id) AS late_customers
+FROM (
+    SELECT
+        s.account_id
+    FROM credit_card_statement s
+    LEFT JOIN transactions t
+        ON s.account_id = t.account_id
+        AND t.merchant = 'Credit Card Payment'
+        AND t.transaction_date
+            BETWEEN s.statement_month
+                AND DATEADD(DAY, 20, s.statement_month)
+    GROUP BY
+        s.statement_id,
+        s.account_id,
+        s.statement_month,
+        s.final_due
+    HAVING
+        DATEADD(DAY, 20, s.statement_month) < GETDATE()
+        AND ISNULL(SUM(t.amount), 0) < s.final_due
+) late_accounts;
+
 
 
