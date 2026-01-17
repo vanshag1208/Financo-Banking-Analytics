@@ -146,7 +146,8 @@ WHERE category = 'Bills'
   AND merchant = 'Credit Card Payment'
 
  SELECT * FROM credit_card_statement
-WHERE account_id ='7'
+ WHERE account_id ='98'
+ ORDER BY statement_month
 
 UPDATE accounts
 SET balance = NULL;
@@ -176,5 +177,22 @@ FROM (
         AND ISNULL(SUM(t.amount), 0) < s.final_due
 ) late_accounts;
 
+
+
+
+--Update Cards URL
+UPDATE cards
+SET card_image_url =
+    CASE
+        WHEN card_type = 'Credit' AND card_tier = 'Silver'
+            THEN 'https://raw.githubusercontent.com/vanshag1208/Financo-Banking-Analytics/main/images/cards/credit_silver.png'
+
+        WHEN card_type = 'Credit' AND card_tier = 'Gold'
+            THEN 'https://raw.githubusercontent.com/vanshag1208/Financo-Banking-Analytics/main/images/cards/credit_gold.png'
+
+        WHEN card_type = 'Credit' AND card_tier = 'Platinum'
+            THEN 'https://raw.githubusercontent.com/vanshag1208/Financo-Banking-Analytics/main/images/cards/credit_platinum.png'
+    END
+WHERE card_type = 'Credit';
 
 
